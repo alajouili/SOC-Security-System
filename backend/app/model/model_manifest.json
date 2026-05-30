@@ -1,0 +1,25 @@
+{
+  "version": "20260529_233129",
+  "trained_at": "2026-05-29T23:31:29.422558+00:00",
+  "sha256": "32105126396337ab5b7edacba94da0c9e58ff8adbf20df5f127ce1c870a9a65d",
+  "model_type": "RandomForestClassifier",
+  "feature_columns": [
+    "status_code",
+    "requests_per_minute",
+    "response_time",
+    "method_encoded",
+    "endpoint_risk",
+    "is_sensitive_endpoint",
+    "hour_of_day",
+    "endpoint_length",
+    "has_suspicious_chars"
+  ],
+  "contamination": 0.39975,
+  "n_samples_train": 4000,
+  "metrics": {
+    "f1_score": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "auc_roc": 1.0
+  }
+}

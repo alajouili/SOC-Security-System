@@ -1,0 +1,155 @@
+version: "3.9"
+
+# ── Secrets Docker (hors .env — OWASP A02) ──────────────────────────────────
+secrets:
+  jwt_private:
+    file: ./keys/private.pem
+  jwt_public:
+    file: ./keys/public.pem
+  db_password:
+    file: ./keys/db_password.txt
+
+# ── Volumes nommés ────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  model_data:
+    driver: local
+
+# ── Réseau interne isolé ──────────────────────────────────────────────────────
+networks:
+  soc_internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+services:
+
+  # ── PostgreSQL 15 avec TLS ─────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: socuser
+      POSTGRES_DB: socdb
+      POSTGRES_PASSWORD: SecurePassw0rd!2024
+    secrets:
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - soc_internal
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U socuser -d socdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Filesystem en lecture seule sauf volumes nécessaires
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run/postgresql
+    security_opt:
+      - no-new-privileges:true
+
+  # ── Backend FastAPI ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: production
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://socuser:SecurePassw0rd!2024@db:5432/socdb
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private
+      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public
+      JWT_ALGORITHM: RS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "15"
+      REFRESH_TOKEN_EXPIRE_DAYS: "7"
+      BCRYPT_ROUNDS: "12"
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      PROMETHEUS_PORT: "9090"
+      LOG_LEVEL: INFO
+      ENVIRONMENT: production
+      MODEL_PATH: /app/model/anomaly_model.pkl
+      MODEL_MANIFEST_PATH: /app/model/model_manifest.json
+      CONTAMINATION_RATE: "0.03"
+    secrets:
+      - jwt_private
+      - jwt_public
+      - db_password
+    volumes:
+      - model_data:/app/model
+    networks:
+      - soc_internal
+    ports:
+      - "8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Prometheus ─────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./backend/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./backend/monitoring/alerts_rules.yml:/etc/prometheus/alerts_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - soc_internal
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=90d"
+      - "--web.enable-lifecycle"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Frontend React + Nginx ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - soc_internal
+    ports:
+      - "3000:80"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

@@ -1,0 +1,1 @@
+# Répertoire du modèle ML — anomaly_model.pkl généré par training.py

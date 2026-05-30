@@ -1,0 +1,48 @@
+groups:
+  - name: soc_alerts
+    rules:
+
+      - alert: AnalyzeLatencyHigh
+        expr: histogram_quantile(0.99, rate(soc_analyze_latency_ms_bucket[5m])) > 200
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence /analyze p99 > 200ms"
+          description: "La latence p99 de l'endpoint /analyze dépasse 200ms depuis 2 minutes."
+
+      - alert: AnomalyRateCritical
+        expr: rate(soc_anomaly_total[5m]) / rate(soc_analyze_latency_ms_count[5m]) > 0.15
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux d'anomalies > 15% sur 5 minutes"
+          description: "Plus de 15% des requêtes analysées sont détectées comme anomalies."
+
+      - alert: HighRiskSpike
+        expr: rate(soc_high_risk_total[1m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "> 10 alertes HIGH par minute"
+          description: "Pic d'alertes HIGH détecté — possible attaque en cours."
+
+      - alert: BruteForceDetected
+        expr: rate(soc_auth_failures_total[1m]) > 20
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Brute force détecté — >20 échecs/min"
+          description: "Taux d'échecs d'authentification critique — brute force probable."
+
+      - alert: ModelIntegrityFailure
+        expr: soc_model_integrity == 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Intégrité du modèle ML compromise"
+          description: "Le hash SHA-256 du modèle ne correspond pas au manifeste."

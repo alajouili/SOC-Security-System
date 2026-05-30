@@ -1,0 +1,147 @@
+/* ── SOC Security System — Dark Industrial Theme ─────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-void:      #050608;
+  --bg-deep:      #080b0f;
+  --bg-surface:   #0d1117;
+  --bg-elevated:  #111820;
+  --bg-card:      #141c26;
+  --bg-hover:     #1a2433;
+
+  --border:       #1e2d3d;
+  --border-bright:#2a3f56;
+
+  --text-primary: #e2e8f0;
+  --text-secondary:#8ba3be;
+  --text-muted:   #4a6070;
+
+  --accent-cyan:  #00d4ff;
+  --accent-cyan2: #0ea5e9;
+  --accent-green: #00ff88;
+  --accent-amber: #ffb800;
+  --accent-red:   #ff3b5c;
+  --accent-purple:#a855f7;
+
+  --high:   #ff3b5c;
+  --medium: #ffb800;
+  --low:    #00ff88;
+
+  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Syne', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+/* ── Scanline overlay effect ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 212, 255, 0.015) 2px,
+    rgba(0, 212, 255, 0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Animations ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
+}
+@keyframes slide-in-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.3); }
+  50%       { box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
+}
+@keyframes threat-flash {
+  0%, 100% { background: transparent; }
+  50%       { background: rgba(255, 59, 92, 0.08); }
+}
+@keyframes counter-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-pulse-dot    { animation: pulse-dot 1.5s ease-in-out infinite; }
+.animate-blink        { animation: blink 1s step-end infinite; }
+.animate-slide-in     { animation: slide-in-right 0.35s cubic-bezier(.22,1,.36,1) both; }
+.animate-slide-up     { animation: slide-in-up 0.3s cubic-bezier(.22,1,.36,1) both; }
+.animate-glow         { animation: glow-pulse 2s ease-in-out infinite; }
+.animate-threat       { animation: threat-flash 1s ease-in-out 3; }
+.animate-counter      { animation: counter-up 0.4s ease both; }
+.animate-spin-slow    { animation: spin-slow 8s linear infinite; }
+
+/* ── Level badges ── */
+.badge-HIGH   { color: var(--high);   border-color: rgba(255,59,92,0.4);  background: rgba(255,59,92,0.08); }
+.badge-MEDIUM { color: var(--medium); border-color: rgba(255,184,0,0.4);  background: rgba(255,184,0,0.08); }
+.badge-LOW    { color: var(--low);    border-color: rgba(0,255,136,0.4);  background: rgba(0,255,136,0.08); }
+
+/* ── Glitch effect for HIGH alerts ── */
+@keyframes glitch {
+  0%   { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+  20%  { clip-path: inset(30% 0 50% 0); transform: translate(2px, 0); }
+  40%  { clip-path: inset(70% 0 10% 0); transform: translate(-1px, 0); }
+  60%  { clip-path: inset(20% 0 60% 0); transform: translate(1px, 0); }
+  80%  { clip-path: inset(80% 0 5% 0);  transform: translate(-2px, 0); }
+  100% { clip-path: inset(0 0 95% 0);   transform: translate(0, 0); }
+}
+
+/* ── Grid lines background ── */
+.grid-bg {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Terminal cursor ── */
+.cursor::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+  color: var(--accent-cyan);
+}
